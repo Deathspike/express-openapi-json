@@ -17,7 +17,7 @@ export class Runner {
       const context = this._create(req);
       if ((this._operation.parameters || this._operation.requestBody) && !this._ajv.validateRequest(this._operation, context)) {
         res.status(400);
-        res.json({message: 'Request validation failed', error: this._ajv.errorText});
+        res.json({message: 'Request validation failed', validationError: this._ajv.errorText});
       } else {
         const result = await this._operationHandler(context);
         if (!(result instanceof api.Result)) {
@@ -32,7 +32,7 @@ export class Runner {
             throw new Error('Invalid result content (Should be populated)');
           } else if (!this._ajv.validateResponse(this._operation, responseKey, result.content)) {
             res.status(500);
-            res.json({message: 'Response validation failed', error: this._ajv.errorText});
+            res.json({message: 'Response validation failed', validationError: this._ajv.errorText});
           } else {
             res.status(result.statusCode);
             res.json(result.content);
