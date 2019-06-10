@@ -72,7 +72,7 @@ function registerSchemaContainer(containerName: string, containerRequired: boole
   if (!requestSchema.properties[containerName]) requestSchema.properties[containerName] = {required: [], properties: {}, type: 'object'};
 }
 
-function registerSchemaParameter(containerName: string, requestSchema: api.IOpenApiSchema, parameterName: string, parameterRequired: boolean, parameterSchema?: api.IOpenApiSchema) {
+function registerSchemaParameter(containerName: string, requestSchema: api.IOpenApiSchema, parameterName: string, parameterRequired?: boolean, parameterSchema?: api.IOpenApiSchema) {
   if (!parameterSchema) throw new Error(`Unspecified schema: ${parameterName}`);
   if (!parameterSchema.type) throw new Error(`Unspecified schema type: ${parameterName}`);
   if (!api.isPrimitive(parameterSchema.type)) throw new Error(`Invalid schema type: ${parameterName}`);

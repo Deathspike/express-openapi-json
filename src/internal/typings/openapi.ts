@@ -25,7 +25,7 @@ export interface IOpenApiOperationContentList {
 export interface IOpenApiOperationParameter {
   in: string;
   name: string;
-  required: boolean;
+  required?: boolean;
   schema?: IOpenApiSchema;
 }
 
