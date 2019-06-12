@@ -5,7 +5,7 @@
   "main": "dist/default",
   "name": "express-openapi-json",
   "repository": "git://github.com/Deathspike/express-openapi-json",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "keywords": [
     "ajv",
     "express",
