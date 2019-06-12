@@ -20,7 +20,7 @@ export class Metadata {
     this._operations.push({operationId, operationHandler, requestHandlers});
   }
 
-  get() {
+  getAll() {
     return this._operations;
   }
 }

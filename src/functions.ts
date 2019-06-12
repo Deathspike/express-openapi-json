@@ -18,5 +18,5 @@ export function json<T>(content: T, statusCode = 200) {
 }
 
 export function status(statusCode = 200) {
-  return new api.Result(statusCode);
+  return new api.Result(statusCode, undefined);
 }

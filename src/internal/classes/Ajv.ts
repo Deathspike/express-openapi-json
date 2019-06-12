@@ -27,8 +27,8 @@ export class Ajv {
 
   resolve<T>(value: T): T {
     const reference = value && api.unsafe(value).$ref;
-    const resolved = reference && this._ajv.getSchema(reference);
-    if (resolved && resolved.schema) return this.resolve(api.unsafe(resolved.schema));
+    const validator = reference && this._ajv.getSchema(reference);
+    if (validator && validator.schema) return this.resolve(api.unsafe(validator.schema));
     return value;
   }
 
