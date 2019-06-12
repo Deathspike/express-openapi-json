@@ -1,6 +1,6 @@
 export interface IOpenApi {
-  paths: IOpenApiPathList;
   components?: IOpenApiComponentList;
+  paths: IOpenApiPathList;
 }
 
 export interface IOpenApiComponentList {
@@ -30,12 +30,11 @@ export interface IOpenApiOperationParameter {
 }
 
 export interface IOpenApiOperationRequestBody {
-  required: boolean;
+  required?: boolean;
   content: IOpenApiOperationContentList;
 }
 
 export interface IOpenApiOperationResponse {
-  $ref?: string;
   content?: IOpenApiOperationContentList;
 }
 
@@ -51,16 +50,12 @@ export interface IOpenApiPathMethodList {
   [method: string]: IOpenApiOperation;
 }
 
-export interface IOpenApiSchema extends IOpenApiSchemaCore {
-  $ref?: string;
+export interface IOpenApiSchema {
   type?: string;
-}
-
-export interface IOpenApiSchemaCore {
   properties?: {[propertyName: string]: IOpenApiSchema};
   required?: string[];
 }
 
 export interface IOpenApiSchemaList {
-  [schemaName: string]: IOpenApiSchemaCore;
+  [schemaName: string]: IOpenApiSchema;
 }

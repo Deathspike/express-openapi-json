@@ -4,7 +4,7 @@ const accessKey = '__api';
 
 export class Metadata {
   private readonly _controller: any;
-  private readonly _operations: {operationId: string, operationHandler: api.OperationHandler, requestHandlers: express.RequestHandler[]}[];
+  private readonly _operations: {operationId: string, operationHandler: api.IOperationHandler, requestHandlers: express.RequestHandler[]}[];
 
   private constructor(controller: any) {
     this._controller = controller;

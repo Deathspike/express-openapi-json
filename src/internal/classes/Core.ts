@@ -4,24 +4,21 @@ import * as express from 'express';
 export class Core {
   private readonly _ajv: api.Ajv;
   private readonly _openapi: api.IOpenApi;
-  private readonly _openapiJson: string;
   private readonly _router: express.Router;
 
-  constructor(openapi: api.IOpenApi) {
-    this._ajv = new api.Ajv(openapi);
+  constructor(openapi: api.IOpenApi, validationContext: api.IValidationContext | undefined) {
+    this._ajv = new api.Ajv(validationContext || api.createValidationContext(openapi));
     this._openapi = openapi;
-    this._openapiJson = JSON.stringify(openapi, null, 2);
     this._router = express.Router();
-    api.createSchemas(this._ajv, this._openapi);
   }
 
   controller(...controllers: any[]) {
-    const items = controllers.map((controller) => api.Metadata.for(controller).get()).reduce((x, y) => x.concat(y));
-    items.forEach((item) => this.operation(item.operationId, item.operationHandler, ...item.requestHandlers));
+    const values = controllers.map((controller) => api.Metadata.for(controller).get()).reduce((x, y) => x.concat(y));
+    values.forEach((value) => this.operation(value.operationId, value.operationHandler, ...value.requestHandlers));
     return this;
   }
   
-  operation(operationId: string, operationHandler: api.OperationHandler, ...requestHandlers: express.RequestHandler[]) {
+  operation(operationId: string, operationHandler: api.IOperationHandler, ...requestHandlers: express.RequestHandler[]) {
     const {path, method, operation} = this._find(operationId);
     const runner = new api.Runner(this._ajv, operation, operationHandler);
     this._add(operationId, method, path, requestHandlers.concat(runner.requestHandlerAsync.bind(runner)));
@@ -29,7 +26,7 @@ export class Core {
   }
 
   router() {
-    this._router.get(`/openapi.json`, (_, res) => res.contentType('json').send(this._openapiJson));
+    this._router.get(`/openapi.json`, (_, res) => res.json(this._openapi));
     this._router.use((_, res) => res.status(404).end());
     return this._router;
   }

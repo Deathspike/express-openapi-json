@@ -4,9 +4,9 @@ import * as express from 'express';
 export class Runner {
   private readonly _ajv: api.Ajv;
   private readonly _operation: api.IOpenApiOperation;
-  private readonly _operationHandler: api.OperationHandler;
+  private readonly _operationHandler: api.IOperationHandler;
   
-  constructor(ajv: api.Ajv, operation: api.IOpenApiOperation, operationHandler: api.OperationHandler) {
+  constructor(ajv: api.Ajv, operation: api.IOpenApiOperation, operationHandler: api.IOperationHandler) {
     this._ajv = ajv;
     this._operation = operation;
     this._operationHandler = operationHandler;

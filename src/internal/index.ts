@@ -6,5 +6,5 @@ export * from './classes/Ajv';
 export * from './classes/Core';
 export * from './classes/Metadata';
 export * from './classes/Runner';
-export * from './typings/core';
+export * from './typings/common';
 export * from './typings/openapi';

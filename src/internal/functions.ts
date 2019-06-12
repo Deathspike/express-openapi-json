@@ -13,6 +13,10 @@ export function isValidPath(path: string) {
   return !/[-[\]()*+?.,\\^$|#\s]/.test(path);
 }
 
-export function unsafe(item: any) {
-  return item;
+export function pascalCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.substr(1);
+}
+
+export function unsafe(value: any) {
+  return value;
 }

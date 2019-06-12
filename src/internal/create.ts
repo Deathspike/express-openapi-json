@@ -1,27 +1,37 @@
 import * as api from '.';
 
-export function createSchemas(ajv: api.Ajv, openapi: api.IOpenApi) {
+export function createValidationContext(openapi: api.IOpenApi) {
+  const validationContext: api.IValidationContext = {components: {}, requests: {}, responses: {}};
+  const ajv = new api.Ajv(validationContext);
+  validationContext.components.schemas = openapi.components && openapi.components.schemas;
+  parse(ajv, openapi, validationContext);
+  return validationContext;
+}
+
+function parse(ajv: api.Ajv, openapi: api.IOpenApi, validationContext: api.IValidationContext) {
   for (const path in openapi.paths) {
     for (const method in openapi.paths[path]) {
       const operation = ajv.resolve(openapi.paths[path][method]);
-      createOperationRequestSchema(ajv, openapi, operation);
-      createOperationResponseSchemas(ajv, openapi, operation);
+      parseOperationRequestSchema(ajv, operation, validationContext);
+      parseOperationResponseSchemas(ajv, operation, validationContext);
     }
   }
 }
 
-function createOperationRequestSchema(ajv: api.Ajv, openapi: api.IOpenApi, operation: api.IOpenApiOperation) {
+function parseOperationRequestSchema(ajv: api.Ajv, operation: api.IOpenApiOperation, validationContext: api.IValidationContext) {
   if (operation.operationId && (operation.parameters || operation.requestBody)) {
     const requestSchemaName = ajv.nameRequest(operation);
     const requestSchema: api.IOpenApiSchema = {};
-    registerSchema(openapi, requestSchemaName, requestSchema);
+    validationContext.requests[requestSchemaName] = requestSchema;
     if (operation.parameters) {
       const parameters = ajv.resolve(operation.parameters);
       for (const unresolvedParameter of parameters) {
         const parameter = ajv.resolve(unresolvedParameter);
         const parameterSchema = ajv.resolve(parameter.schema);
-        const containerName = parameter.in;
-        registerSchemaParameter(containerName, requestSchema, parameter.name, parameter.required, parameterSchema);
+        validateParameterConstraints(parameter.name, parameterSchema);
+        registerSchemaContainer(parameter.in, true, requestSchema);
+        requestSchema.properties![parameter.in]!.properties![parameter.name] = parameter.schema!; // Unresolved
+        if (parameter.required) requestSchema.properties![parameter.in]!.required!.push(parameter.name);
       }
     }
     if (operation.requestBody) {
@@ -29,10 +39,9 @@ function createOperationRequestSchema(ajv: api.Ajv, openapi: api.IOpenApi, opera
       const content = ajv.resolve(requestBody.content);
       const contentJson = ajv.resolve(content['application/json']);
       if (contentJson && contentJson.schema) {
-        const containerName = 'requestBody';
-        const containerSchema = ajv.resolve(contentJson.schema);
-        registerSchemaContainer(containerName, requestBody.required, requestSchema);
-        requestSchema.properties![containerName] = containerSchema;
+        const required = requestBody.required || false;
+        registerSchemaContainer('requestBody', required, requestSchema);
+        requestSchema.properties!['requestBody'] = contentJson.schema; // Unresolved
       } else {
         throw new Error(`Invalid request body: ${operation.operationId}`);
       }
@@ -40,7 +49,7 @@ function createOperationRequestSchema(ajv: api.Ajv, openapi: api.IOpenApi, opera
   }
 }
 
-function createOperationResponseSchemas(ajv: api.Ajv, openapi: api.IOpenApi, operation: api.IOpenApiOperation) {
+function parseOperationResponseSchemas(ajv: api.Ajv, operation: api.IOpenApiOperation, validationContext: api.IValidationContext) {
   if (operation.operationId) {
     for (const responseKey in operation.responses) {
       let response = ajv.resolve(operation.responses[responseKey]);
@@ -49,8 +58,8 @@ function createOperationResponseSchemas(ajv: api.Ajv, openapi: api.IOpenApi, ope
         const contentJson = content['application/json'];
         if (contentJson && contentJson.schema) {
           const responseSchemaName = ajv.nameResponse(operation, responseKey);
-          const responseSchema = ajv.resolve(contentJson.schema);
-          registerSchema(openapi, responseSchemaName, responseSchema);
+          const responseSchema = contentJson.schema; // Unresolved
+          validationContext.responses[responseSchemaName] = responseSchema;
         } else {
           throw new Error(`Invalid response content: ${operation.operationId} -> ${responseKey}`);
         }
@@ -59,24 +68,15 @@ function createOperationResponseSchemas(ajv: api.Ajv, openapi: api.IOpenApi, ope
   }
 }
 
-function registerSchema(openapi: api.IOpenApi, schemaName: string, schema: api.IOpenApiSchemaCore) {
-  if (!openapi.components) openapi.components = {};
-  if (!openapi.components.schemas) openapi.components.schemas = {};
-  openapi.components.schemas[schemaName] = schema;
+function registerSchemaContainer(name: string, required: boolean, schema: api.IOpenApiSchema) {
+  if (!schema.required) schema.required = [];
+  if (!schema.required.includes(name) && required) schema.required.push(name);
+  if (!schema.properties) schema.properties = {};
+  if (!schema.properties[name]) schema.properties[name] = {type: 'object', required: [], properties: {}};
 }
 
-function registerSchemaContainer(containerName: string, containerRequired: boolean, requestSchema: api.IOpenApiSchema) {
-  if (!requestSchema.required) requestSchema.required = [];
-  if (!requestSchema.required.includes(containerName) && containerRequired) requestSchema.required.push(containerName);
-  if (!requestSchema.properties) requestSchema.properties = {};
-  if (!requestSchema.properties[containerName]) requestSchema.properties[containerName] = {required: [], properties: {}, type: 'object'};
-}
-
-function registerSchemaParameter(containerName: string, requestSchema: api.IOpenApiSchema, parameterName: string, parameterRequired?: boolean, parameterSchema?: api.IOpenApiSchema) {
-  if (!parameterSchema) throw new Error(`Unspecified schema: ${parameterName}`);
-  if (!parameterSchema.type) throw new Error(`Unspecified schema type: ${parameterName}`);
-  if (!api.isPrimitive(parameterSchema.type)) throw new Error(`Invalid schema type: ${parameterName}`);
-  registerSchemaContainer(containerName, true, requestSchema);
-  requestSchema.properties![containerName]!.properties![parameterName] = parameterSchema;
-  if (parameterRequired) requestSchema.properties![containerName]!.required!.push(parameterName);
+function validateParameterConstraints(name: string, schema: api.IOpenApiSchema | undefined) {
+  if (!schema) throw new Error(`Unspecified schema: ${name}`);
+  if (!schema.type) throw new Error(`Unspecified schema type: ${name}`);
+  if (!api.isPrimitive(schema.type)) throw new Error(`Invalid schema type: ${name}`);  
 }
