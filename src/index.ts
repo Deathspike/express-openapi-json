@@ -1,3 +1,3 @@
-import * as api from './api';
-export * from './api';
-export default api;
+export * from './functions';
+export * from './classes/Context';
+export * from './classes/Result';

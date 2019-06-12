@@ -2,7 +2,7 @@
   "author": "Roel van Uden",
   "description": "Builds an express router using OpenAPI with request and response validation.",
   "license": "MIT",
-  "main": "dist",
+  "main": "dist/default",
   "name": "express-openapi-json",
   "repository": "git://github.com/Deathspike/express-openapi-json",
   "version": "1.0.1",
