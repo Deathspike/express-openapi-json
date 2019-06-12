@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+var path = require('path');
+var fs = require('fs');
+var scripts = path.join(path.dirname(fs.realpathSync(__filename)), '../scripts');
+require(scripts + '/openapi2ts');

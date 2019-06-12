@@ -91,6 +91,24 @@ server.use(router);
 server.listen(3000);
 ```
 
+# Scripts
+
+Certain scripts are made available after package installation.
+
+## openapi2ts
+
+Converts an `openapi` document to `TypeScript` definitions. Limitations:
+
+* Your `OpenAPI` document must be stored as `json`.
+
+Installation:
+
+    npm install json-schema-to-typescript --save-dev
+
+Usage:
+
+    openapi2js your_openapi.json > your_typescript.ts
+
 # OpenAPI
 
 This section describes the supported features and limitations.
