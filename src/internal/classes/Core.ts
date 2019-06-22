@@ -34,6 +34,6 @@ export class Core {
   private _add(method: string, path: string, requestHandlers: express.RequestHandler[]) {
     if (!api.isValidMethod(method)) throw new Error(`Invalid method: ${method}`);
     if (!api.isValidPath(path)) throw new Error(`Invalid path: ${path}`);
-    api.unsafe(this._router)[method](path.replace(/{(.+?)}/, ':$1'), requestHandlers);
+    api.unsafe(this._router)[method](path.replace(/{(.+?)}/g, ':$1'), requestHandlers);
   }
 }
