@@ -1,6 +1,7 @@
 import * as ajv from 'ajv';
 import * as api from '..';
 const requestSuffix = 'Context';
+const responseSuffix = 'Response';
 
 export class Ajv {
   private readonly _ajv: ajv.Ajv;
@@ -22,7 +23,7 @@ export class Ajv {
   nameResponse(operation: api.IOpenApiOperation, responseKey: string) {
     if (!operation.operationId) throw new Error('Unspecified operation identifier');
     const keySuffix = responseKey !== '200' ? api.pascalCase(responseKey) : '';
-    return api.pascalCase(operation.operationId) + keySuffix;
+    return api.pascalCase(operation.operationId) + keySuffix + responseSuffix;
   }
 
   resolve<T>(value: T): T {
