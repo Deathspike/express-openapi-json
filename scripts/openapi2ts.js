@@ -10,17 +10,18 @@ const validationContext = api.createValidationContext(JSON.parse(contents));
 
 [validationContext.components.schemas, validationContext.requests, validationContext.responses].forEach((values) => {
   for (const propertyName in values) {
-    if (definitions[propertyName]) throw new Error(`Duplicate definition: ${propertyName}`);
-    definitions[propertyName] = values[propertyName];
-    properties[propertyName] = {$ref: `#/definitions/${propertyName}`};
-    update(propertyName, definitions[propertyName]);
+    const newPropertyName = `I${propertyName}`;
+    if (definitions[newPropertyName]) throw new Error(`Duplicate definition: ${newPropertyName}`);
+    definitions[newPropertyName] = values[propertyName];
+    properties[newPropertyName] = {$ref: `#/definitions/${newPropertyName}`};
+    update(newPropertyName, definitions[newPropertyName]);
   }
 });
 
 function update(root, schema) {
   if (schema.$ref) {
     const match =  schema.$ref.match(/^#\/components\/schemas\/(.*)$/);
-    const reference = match && match[1];
+    const reference = match && match[1] ? `I${match[1]}` : undefined;
     if (reference) schema.$ref = `#/definitions/${reference}`;
     if (reference && root) redirects.push({root, reference});
   } else if (Array.isArray(schema)) {
