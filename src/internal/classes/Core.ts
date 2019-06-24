@@ -14,8 +14,11 @@ export class Core {
   }
 
   controller(...controllers: any[]) {
-    const values = controllers.map((controller) => api.Metadata.for(controller).getAll()).reduce((x, y) => x.concat(y));
-    values.forEach((value) => this.operation(value.operationId, value.operationHandler, ...value.requestHandlers));
+    for (const controller of controllers) {
+      for (const value of api.Metadata.for(controller).getAll()) {
+        this.operation(value.operationId, controller[value.actionName].bind(controller), ...value.requestHandlers)
+      }
+    }
     return this;
   }
   

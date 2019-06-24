@@ -27,6 +27,6 @@
     "express": "^4.17.0"
   },
   "scripts": {
-    "prepack": "tsc"
+    "prepare": "tsc"
   }
 }
