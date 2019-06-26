@@ -41,7 +41,7 @@ export class Runner {
       }
     } catch (error) {
       res.status(500);
-      res.json({message: error && error.message});
+      res.json({message: error && error.stack});
     }
   }
 
