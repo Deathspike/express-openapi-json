@@ -6,7 +6,7 @@ Builds an express router using `OpenAPI` with request and response validation.
 
 * Your `ExpressJS` server includes `body-parser` and `cookie-parser` when applicable.
 * Your `OpenAPI` document is version `3.0` and valid (See https://editor.swagger.io/).
-* Your `OpenAPI` document consumes and produces `application/json`.
+* Your `OpenAPI` document consumes `application/json` and produces `application/json` or *binary*.
 * Your `OpenAPI` document operations declare an  `operationId`.
 
 ## Installation
@@ -120,7 +120,7 @@ This section describes the supported features and limitations.
         [Path]: {
           [method]: Operation = {
             parameters?: Parameter[],
-            responseBody?: ResponseBody
+            requestBody?: RequestBody
             responses: {
               [responseKey]: Response
             }
@@ -146,7 +146,7 @@ Supported with validation (including `required`). Limitations:
   * `number` (`/^[0-9]+(\.[0-9]+)?$/`)
   * `string`
 
-### ResponseBody (Operation)
+### RequestBody (Operation)
 
 Supported with validation. Limitations:
 
@@ -181,5 +181,5 @@ Unsupported.
 
 Supported with validation. Limitations:
 
-* Content **MUST** have a `contentType` = `application/json`.
+* Content **SHOULD** have a `contentType` = `application/json`.
 * Content **MUST** have a `schema` for `application/json`. See [Schema](#Schema).

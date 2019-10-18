@@ -42,8 +42,6 @@ function parseOperationRequestSchema(ajv: api.Ajv, operation: api.IOpenApiOperat
         const required = requestBody.required || false;
         registerSchemaContainer('requestBody', required, requestSchema);
         requestSchema.properties!['requestBody'] = contentJson.schema; // Unresolved
-      } else {
-        throw new Error(`Invalid request body: ${operation.operationId}`);
       }
     }
   }
@@ -60,8 +58,6 @@ function parseOperationResponseSchemas(ajv: api.Ajv, operation: api.IOpenApiOper
           const responseSchemaName = ajv.nameResponse(operation, responseKey);
           const responseSchema = contentJson.schema; // Unresolved
           validationContext.responses[responseSchemaName] = responseSchema;
-        } else {
-          throw new Error(`Invalid response content: ${operation.operationId} -> ${responseKey}`);
         }
       }
     }
@@ -75,7 +71,7 @@ function registerSchemaContainer(name: string, required: boolean, schema: api.IO
   if (!schema.properties[name]) schema.properties[name] = {type: 'object', required: [], properties: {}};
 }
 
-function validateParameterConstraints(name: string, schema: api.IOpenApiSchema | undefined) {
+function validateParameterConstraints(name: string, schema?: api.IOpenApiSchema) {
   if (!schema) throw new Error(`Unspecified schema: ${name}`);
   if (!schema.type) throw new Error(`Unspecified schema type: ${name}`);
   if (!api.isPrimitive(schema.type)) throw new Error(`Invalid schema type: ${name}`);  

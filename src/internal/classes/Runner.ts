@@ -20,23 +20,23 @@ export class Runner {
         res.json({message: 'Request validation failed', validationError: this._ajv.errorText});
       } else {
         const result = await this._operationHandler(context);
-        if (!(result instanceof api.Result)) {
-          throw new Error('Invalid result');
+        const {responseKey, response} = this._find(String(result.statusCode));
+        if (Buffer.isBuffer(result.content)) {
+          res.type(result.contentType || 'application/octet-stream');
+          res.status(result.statusCode);
+          res.send(result.content);
+        } else if (!response.content) {
+          if (result.content) throw new Error('Invalid result content (Should be empty)');
+          res.status(result.statusCode);
+          res.end();
+        } else if (!result.content) {
+          throw new Error('Invalid result content (Should be populated)');
+        } else if (!this._ajv.validateResponse(this._operation, responseKey, result.content)) {
+          res.status(500);
+          res.json({message: 'Response validation failed', validationError: this._ajv.errorText});
         } else {
-          const {responseKey, response} = this._find(String(result.statusCode));
-          if (!response.content) {
-            if (result.content) throw new Error('Invalid result content (Should be empty)');
-            res.status(result.statusCode);
-            res.end();
-          } else if (!result.content) {
-            throw new Error('Invalid result content (Should be populated)');
-          } else if (!this._ajv.validateResponse(this._operation, responseKey, result.content)) {
-            res.status(500);
-            res.json({message: 'Response validation failed', validationError: this._ajv.errorText});
-          } else {
-            res.status(result.statusCode);
-            res.json(result.content);
-          }
+          res.status(result.statusCode);
+          res.json(result.content);
         }
       }
     } catch (error) {

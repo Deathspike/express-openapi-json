@@ -6,7 +6,7 @@ export class Core {
   private readonly _operations: api.Operations;
   private readonly _router: express.Router;
 
-  constructor(openapi: api.IOpenApi, validationContext: api.IValidationContext | undefined) {
+  constructor(openapi: api.IOpenApi, validationContext?: api.IValidationContext) {
     this._ajv = new api.Ajv(validationContext || api.createValidationContext(openapi));
     this._operations = new api.Operations(openapi);
     this._router = express.Router({caseSensitive: true, strict: true});
