@@ -21,11 +21,8 @@ export class Runner {
       } else {
         const result = await this._operationHandler(context);
         const {responseKey, response} = this._find(String(result.statusCode));
-        if (Buffer.isBuffer(result.content)) {
-          if (result.fileName) res.attachment(result.fileName)
-          res.type(result.contentType || 'application/octet-stream');
-          res.status(result.statusCode);
-          res.send(result.content);
+        if (typeof result.content === 'function') {
+          result.content(req, res);
         } else if (!response.content) {
           if (result.content) throw new Error('Invalid result content (Should be empty)');
           res.status(result.statusCode);
