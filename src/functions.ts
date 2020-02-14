@@ -13,8 +13,8 @@ export function createValidationContext(openapi: api.IOpenApi) {
   return api.createValidationContext(openapi);
 }
 
-export function buffer(content: Buffer, contentType?: string, statusCode = 200) {
-  return new api.Result(statusCode, content, contentType);
+export function buffer(content: Buffer, contentType?: string, fileName?: string, statusCode = 200) {
+  return new api.Result(statusCode, content, contentType, fileName);
 }
 
 export function json<T>(content: T, statusCode = 200) {

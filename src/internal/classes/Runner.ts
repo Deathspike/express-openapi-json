@@ -22,6 +22,7 @@ export class Runner {
         const result = await this._operationHandler(context);
         const {responseKey, response} = this._find(String(result.statusCode));
         if (Buffer.isBuffer(result.content)) {
+          if (result.fileName) res.attachment(result.fileName)
           res.type(result.contentType || 'application/octet-stream');
           res.status(result.statusCode);
           res.send(result.content);
