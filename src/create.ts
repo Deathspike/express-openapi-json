@@ -1,14 +1,15 @@
-import * as api from '.';
+import * as app from '.';
+import * as apx from './internal';
 
-export function createValidationContext(openapi: api.IOpenApi) {
-  const validationContext: api.IValidationContext = {components: {}, requests: {}, responses: {}};
-  const ajv = new api.Ajv(validationContext);
+export function createValidationContext(openapi: app.IOpenApi) {
+  const validationContext: app.IValidationContext = {components: {}, requests: {}, responses: {}};
+  const ajv = new apx.Ajv(validationContext);
   validationContext.components.schemas = openapi.components && openapi.components.schemas;
   parse(ajv, openapi, validationContext);
   return validationContext;
 }
 
-function parse(ajv: api.Ajv, openapi: api.IOpenApi, validationContext: api.IValidationContext) {
+function parse(ajv: apx.Ajv, openapi: app.IOpenApi, validationContext: app.IValidationContext) {
   for (const path in openapi.paths) {
     for (const method in openapi.paths[path]) {
       const operation = ajv.resolve(openapi.paths[path][method]);
@@ -18,10 +19,10 @@ function parse(ajv: api.Ajv, openapi: api.IOpenApi, validationContext: api.IVali
   }
 }
 
-function parseOperationRequestSchema(ajv: api.Ajv, operation: api.IOpenApiOperation, validationContext: api.IValidationContext) {
+function parseOperationRequestSchema(ajv: apx.Ajv, operation: app.IOpenApiOperation, validationContext: app.IValidationContext) {
   if (operation.operationId && (operation.parameters || operation.requestBody)) {
     const requestSchemaName = ajv.nameRequest(operation);
-    const requestSchema: api.IOpenApiSchema = {};
+    const requestSchema: app.IOpenApiSchema = {};
     validationContext.requests[requestSchemaName] = requestSchema;
     if (operation.parameters) {
       const parameters = ajv.resolve(operation.parameters);
@@ -47,7 +48,7 @@ function parseOperationRequestSchema(ajv: api.Ajv, operation: api.IOpenApiOperat
   }
 }
 
-function parseOperationResponseSchemas(ajv: api.Ajv, operation: api.IOpenApiOperation, validationContext: api.IValidationContext) {
+function parseOperationResponseSchemas(ajv: apx.Ajv, operation: app.IOpenApiOperation, validationContext: app.IValidationContext) {
   if (operation.operationId) {
     for (const responseKey in operation.responses) {
       let response = ajv.resolve(operation.responses[responseKey]);
@@ -64,15 +65,15 @@ function parseOperationResponseSchemas(ajv: api.Ajv, operation: api.IOpenApiOper
   }
 }
 
-function registerSchemaContainer(name: string, required: boolean, schema: api.IOpenApiSchema) {
+function registerSchemaContainer(name: string, required: boolean, schema: app.IOpenApiSchema) {
   if (!schema.required) schema.required = [];
   if (!schema.required.includes(name) && required) schema.required.push(name);
   if (!schema.properties) schema.properties = {};
   if (!schema.properties[name]) schema.properties[name] = {type: 'object', required: [], properties: {}};
 }
 
-function validateParameterConstraints(name: string, schema?: api.IOpenApiSchema) {
+function validateParameterConstraints(name: string, schema?: app.IOpenApiSchema) {
   if (!schema) throw new Error(`Unspecified schema: ${name}`);
   if (!schema.type) throw new Error(`Unspecified schema type: ${name}`);
-  if (!api.isPrimitive(schema.type)) throw new Error(`Invalid schema type: ${name}`);  
+  if (!['boolean', 'integer', 'number', 'string'].includes(schema.type)) throw new Error(`Invalid schema type: ${name}`);  
 }

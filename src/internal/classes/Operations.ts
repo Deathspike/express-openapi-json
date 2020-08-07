@@ -1,21 +1,16 @@
-import * as api from '..';
+import * as app from '../..';
 
 export class Operations {
-  private readonly _openapi: api.IOpenApi;
-  private readonly _operations: {[operationId: string]: {method: string, path: string, operation: api.IOpenApiOperation}};
-  private _isLoaded: boolean;
+  private readonly _openapi: app.IOpenApi;
+  private readonly _operations: {[operationId: string]: {method: string, path: string, operation: app.IOpenApiOperation}};
 
-  constructor(openapi: api.IOpenApi) {
-    this._isLoaded = false;
+  constructor(openapi: app.IOpenApi) {
     this._openapi = openapi;
     this._operations = {};
+    this._init();
   }
 
   get(operationId: string) {
-    if (!this._isLoaded) {
-      this._init();
-      this._isLoaded = true;
-    }
     if (this._operations[operationId]) {
       return this._operations[operationId];
     } else {

@@ -1,8 +1,7 @@
-import * as express from 'express';
 const accessKey = '__api';
 
 export class Metadata {
-  private readonly _operations: {actionName: string, operationId: string, requestHandlers: express.RequestHandler[]}[];
+  private readonly _operations: {actionName: string, operationId: string}[];
 
   private constructor() {
     this._operations = [];
@@ -12,8 +11,8 @@ export class Metadata {
     return controller[accessKey] || (controller[accessKey] = new Metadata());
   }
 
-  create(actionName: string, operationId: string, requestHandlers: express.RequestHandler[]) {
-    this._operations.push({actionName, operationId, requestHandlers});
+  create(actionName: string, operationId: string) {
+    this._operations.push({actionName, operationId});
   }
 
   getAll() {

@@ -1,3 +1,3 @@
-import * as api from '.';
+import * as app from '.';
 export * from '.';
-export default api;
+export default app;

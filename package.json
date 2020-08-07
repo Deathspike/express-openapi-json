@@ -1,11 +1,11 @@
 {
   "author": "Roel van Uden",
-  "description": "Builds an express router using OpenAPI with request and response validation.",
+  "description": "Builds an express-compatible router using OpenAPI with request and response validation.",
   "license": "MIT",
   "main": "dist/default",
   "name": "express-openapi-json",
   "repository": "git://github.com/Deathspike/express-openapi-json",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "keywords": [
     "ajv",
     "express",
@@ -16,15 +16,14 @@
   "bin": {
     "openapi2ts": "./bin/openapi2ts"
   },
-  "devDependencies": {
-    "@types/express": "^4.17.0",
-    "ajv": "^6.10.0",
-    "express": "^4.17.0",
-    "typescript": "^3.5.0"
+  "dependencies": {
+    "ajv": "6.12.3",
+    "path-to-regexp": "6.1.0"
   },
-  "peerDependencies": {
-    "ajv": "^6.10.0",
-    "express": "^4.17.0"
+  "devDependencies": {
+    "@types/express": "4.17.7",
+    "@types/node": "14.0.27",
+    "typescript": "3.8.3"
   },
   "scripts": {
     "prepare": "tsc"

@@ -5,6 +5,7 @@
     "module": "commonjs",                     /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
     "declaration": true,                      /* Generates corresponding '.d.ts' file. */
     "outDir": "dist",                         /* Redirect output structure to the directory. */
+    "skipLibCheck": true,                     /* Skip type checking of declaration files. Requires TypeScript version 2.0 or later. */
 
     /* Strict Type-Checking Options */
     "strict": true,                           /* Enable all strict type-checking options. */
@@ -27,6 +28,12 @@
 
     /* Source Map Options */
     "inlineSourceMap": true,                  /* Emit a single file with source maps instead of having a separate file. */
-    "inlineSources": true                     /* Emit the source alongside the sourcemaps within a single file; requires '--inlineSourceMap' or '--sourceMap' to be set. */
+    "inlineSources": true,                    /* Emit the source alongside the sourcemaps within a single file; requires '--inlineSourceMap' or '--sourceMap' to be set. */
+
+    /* Experimental Options */
+    "experimentalDecorators": true,           /* Enables experimental support for ES7 decorators. */
+    
+    /* Advanced Options */
+    "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
   }
 }

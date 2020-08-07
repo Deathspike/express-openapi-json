@@ -1,26 +1,18 @@
-import * as api from './internal';
-import * as express from 'express';
+import * as app from '.';
+import * as apx from './internal';
 
-export function createCore(openapi: api.IOpenApi, validationContext?: api.IValidationContext) {
-  return new api.Core(openapi, validationContext);
+export function content<T>(content: T, statusCode = 200, headers?: {[key: string]: string}) {
+  return new app.Result(content, statusCode, headers);
 }
 
-export function createOperation(operationId: string, ...requestHandlers: express.RequestHandler[]) {
-  return (controller: any, actionName: string) => api.Metadata.for(controller).create(actionName, operationId, requestHandlers);
+export function createCore(openapi: app.IOpenApi) {
+  return new app.Core(openapi);
 }
 
-export function createValidationContext(openapi: api.IOpenApi) {
-  return api.createValidationContext(openapi);
+export function createOperation(operationId: string) {
+  return (controller: any, actionName: string) => apx.Metadata.for(controller).create(actionName, operationId);
 }
 
-export function handler(content: (req: express.Request, res: express.Response) => void, statusCode = 200) {
-  return new api.Result(statusCode, content);
-}
-
-export function json<T>(content: T, statusCode = 200) {
-  return new api.Result(statusCode, content);
-}
-
-export function status<T>(statusCode = 200) {
-  return new api.Result<T>(statusCode);
+export function status<T>(statusCode = 200, headers?: {[key: string]: string}) {
+  return new app.Result<T>(undefined, statusCode, headers);
 }

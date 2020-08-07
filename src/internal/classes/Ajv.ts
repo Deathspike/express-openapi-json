@@ -1,12 +1,12 @@
 import * as ajv from 'ajv';
-import * as api from '..';
+import * as app from '../..';
 const requestSuffix = 'Context';
 const responseSuffix = 'Response';
 
 export class Ajv {
   private readonly _ajv: ajv.Ajv;
 
-  constructor(validationContext: api.IValidationContext) {
+  constructor(validationContext: app.IValidationContext) {
     this._ajv = ajv.default({removeAdditional: 'all', useDefaults: true});
     this._ajv.addSchema(validationContext);
   }
@@ -15,33 +15,37 @@ export class Ajv {
     return this._ajv.errorsText(this._ajv.errors);
   }
 
-  nameRequest(operation: api.IOpenApiOperation) {
+  nameRequest(operation: app.IOpenApiOperation) {
     if (!operation.operationId) throw new Error('Unspecified operation identifier');
-    return api.pascalCase(operation.operationId) + requestSuffix;
+    return pascalCase(operation.operationId) + requestSuffix;
   }
 
-  nameResponse(operation: api.IOpenApiOperation, responseKey: string) {
+  nameResponse(operation: app.IOpenApiOperation, responseKey: string) {
     if (!operation.operationId) throw new Error('Unspecified operation identifier');
-    const keySuffix = responseKey !== '200' ? api.pascalCase(responseKey) : '';
-    return api.pascalCase(operation.operationId) + keySuffix + responseSuffix;
+    const keySuffix = responseKey !== '200' ? pascalCase(responseKey) : '';
+    return pascalCase(operation.operationId) + keySuffix + responseSuffix;
   }
 
   resolve<T>(value: T): T {
-    const reference = value && api.unsafe(value).$ref;
+    const reference = value && (value as any).$ref;
     const validator = reference && this._ajv.getSchema(reference);
-    if (validator && validator.schema) return this.resolve(api.unsafe(validator.schema));
+    if (validator && validator.schema) return this.resolve(validator.schema as any);
     return value;
   }
 
-  validateRequest<T>(operation: api.IOpenApiOperation, value: T) {
+  validateRequest<T>(operation: app.IOpenApiOperation, value: T) {
     const name = this.nameRequest(operation);
     const reference = `#/requests/${name}`;
     return this._ajv.validate(reference, value);
   }
 
-  validateResponse<T>(operation: api.IOpenApiOperation, responseKey: string, value: T) {
+  validateResponse<T>(operation: app.IOpenApiOperation, responseKey: string, value: T) {
     const name = this.nameResponse(operation, responseKey);
     const reference = `#/responses/${name}`;
     return this._ajv.validate(reference, value);
   }
+}
+
+function pascalCase(value: string) {
+  return value.charAt(0).toUpperCase() + value.substr(1);
 }

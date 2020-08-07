@@ -1,12 +1,12 @@
 # ExpressJS + OpenAPI + JSON = <3
 
-Builds an express router using `OpenAPI` with request and response validation.
+Builds an express-compatible router using `OpenAPI` with request and response validation.
 
 ## Assumptions
 
 * Your `ExpressJS` server includes `body-parser` and `cookie-parser` when applicable.
 * Your `OpenAPI` document is version `3.0` and valid (See https://editor.swagger.io/).
-* Your `OpenAPI` document consumes `application/json` and produces `application/json` or *binary*.
+* Your `OpenAPI` document consumes `application/json` and produces `application/json`.
 * Your `OpenAPI` document operations declare an  `operationId`.
 
 ## Installation
@@ -15,12 +15,6 @@ Install `express-openapi-json`:
 
 ```
 npm install express-openapi-json
-```
-
-Install peer dependencies:
-
-```
-npm install ajv express
 ```
 
 ## Quick Start
@@ -48,16 +42,16 @@ const router = api.createCore(require('./openapi.json'))
   .router();
 ```
 
-Using the router:
+Using the router in `express`:
 
 ```js
-app.use(router);
+app.use(router.express());
 ```
 
-Using the router mounted under `/api`:
+Using the router in `express` mounted under `/api`:
 
 ```js
-app.use('/api', router);
+app.use('/api', router.express());
 ```
 
 ## Full Example
@@ -87,7 +81,7 @@ const router = api.createCore(require('./openapi.json'))
 const server = express();
 server.use(bodyParser.json());
 server.use(cookieParser());
-server.use(router);
+server.use(router.express());
 server.listen(3000);
 ```
 
