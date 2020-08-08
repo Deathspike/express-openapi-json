@@ -125,9 +125,7 @@ This section describes the supported features and limitations.
 
 ### Path
 
-Supported. Limitations:
-
-  * Regular expression characters **MUST NOT** be used (`/[-[\]{}()*+?.,\\^$|#\s]/`).
+Supported.
 
 ### Parameter (Operation)
 
