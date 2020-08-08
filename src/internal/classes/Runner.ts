@@ -16,28 +16,28 @@ export class Runner {
     try {
       this._process(context);
       if ((this._operation.parameters || this._operation.requestBody) && !this._ajv.validateRequest(this._operation, context)) {
-        return new app.Result(`Request validation failed: ${this._ajv.errorText}`, 400);
+        return app.content(`Request validation failed: ${this._ajv.errorText}`, 400);
       } else {
         const result = await this._operationHandler(context);
         const response = this._find(String(result.statusCode));
         if (!response) {
-          return new app.Result(`Unspecified status code: ${result.statusCode}`, 500);
+          return app.content(`Unspecified status code: ${result.statusCode}`, 500);
         } else if (!response.content) {
           if (!result.content) return result;
-          return new app.Result('Invalid result content (Should be empty)', 500);
+          return app.content('Invalid result content (Should be empty)', 500);
         } else if (!result.content) {
-          return new app.Result('Invalid result content (Should be populated)', 500);
+          return app.content('Invalid result content (Should be populated)', 500);
         } else if (Buffer.isBuffer(result.content) || typeof result.content === 'function') {
           return result;
         } else if (!this._ajv.validateResponse(this._operation, response.key, result.content)) {
-          return new app.Result(`Response validation failed: ${this._ajv.errorText}`, 500);
+          return app.content(`Response validation failed: ${this._ajv.errorText}`, 500);
         } else {
           return result;
         }
       }
     } catch (error) {
       const message = String(error && error.stack);
-      return new app.Result(message, 500);
+      return app.content(message, 500);
     }
   }
 

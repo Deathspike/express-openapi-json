@@ -1,5 +1,6 @@
 import * as app from '..';
 import * as express from 'express';
+import * as http from 'http';
 import * as regexp from 'path-to-regexp';
 
 export class Router {
@@ -19,7 +20,7 @@ export class Router {
         if (match) return await operationHandler(context.withPath(match.params));
       }
     }
-    return new app.Result(undefined, 404);
+    return app.status(404);
   }
 
   express() {
@@ -44,9 +45,42 @@ export class Router {
       }
     };
   }
+
+  node() {
+    return async (req: http.IncomingMessage, res: http.ServerResponse) => {
+      try {
+        const context = await app.Context.nodeAsync(req);
+        const result = await this.execAsync(req.method!, context.path, context);
+        if (Buffer.isBuffer(result.content)) {
+          copyHeaders(result, res);
+          res.statusCode = result.statusCode;
+          res.write(result.content);
+          res.end();
+        } else if (typeof result.content === 'function') {
+          copyHeaders(result, res);
+          res.statusCode = result.statusCode;
+          await result.content(req, res);
+        } else if (result.content == null) {
+          copyHeaders(result, res);
+          res.statusCode = result.statusCode;
+          res.end();
+        } else {
+          copyHeaders(result, res);
+          res.setHeader('Content-Type', 'application/json');
+          res.statusCode = result.statusCode;
+          res.write(JSON.stringify(result.content));
+          res.end();
+        }
+      } catch (error) {
+        res.statusCode = 500;
+        res.write(String(error && error.stack));
+        res.end();
+      }
+    };
+  }
 }
 
-function copyHeaders<T>(result: app.Result<T>, res: express.Response) {
+function copyHeaders<T>(result: app.Result<T>, res: http.ServerResponse) {
   for (const key in result.headers) {
     const value = result.headers[key];
     res.setHeader(key, value);
