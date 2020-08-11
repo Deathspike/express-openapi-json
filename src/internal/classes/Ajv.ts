@@ -1,4 +1,4 @@
-import * as ajv from 'ajv';
+import ajv from 'ajv';
 import * as app from '../..';
 const requestSuffix = 'Context';
 const responseSuffix = 'Response';
@@ -7,7 +7,7 @@ export class Ajv {
   private readonly _ajv: ajv.Ajv;
 
   constructor(validationContext: app.IValidationContext) {
-    this._ajv = ajv.default({removeAdditional: 'all', useDefaults: true});
+    this._ajv = ajv();
     this._ajv.addSchema(validationContext);
   }
 
