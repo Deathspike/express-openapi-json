@@ -5,6 +5,11 @@ import * as regexp from 'path-to-regexp';
 
 export class Router {
   private readonly _handlers: {[method: string]: [regexp.MatchFunction, app.IOperationHandler][]} = {};
+  private readonly _operationModifier?: app.IOperationModifier;
+
+  constructor(operationModifier?: app.IOperationModifier) {
+    this._operationModifier = operationModifier;
+  }
 
   add(method: string, path: string, operationHandler: app.IOperationHandler) {
     const lowerCaseMethod = method.toLowerCase();
@@ -17,7 +22,9 @@ export class Router {
     if (this._handlers[lowerCaseMethod]) {
       for (const [matcher, operationHandler] of this._handlers[lowerCaseMethod]) {
         const match = matcher(path);
-        if (match) return await operationHandler(context.withPath(match.params));
+        const result = match && await operationHandler(context.withPath(match.params));
+        const response = result && this._operationModifier ? await this._operationModifier(result) : result;
+        if (response) return response;
       }
     }
     return app.status(404);

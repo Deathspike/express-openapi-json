@@ -6,10 +6,10 @@ export class Core {
   private readonly _operations: apx.Operations;
   private readonly _router: app.Router;
 
-  constructor(openapi: app.IOpenApi) {
+  constructor(openapi: app.IOpenApi, operationModifier?: app.IOperationModifier) {
     this._ajv = new apx.Ajv(app.createValidationContext(openapi));
     this._operations = new apx.Operations(openapi);
-    this._router = new app.Router();
+    this._router = new app.Router(operationModifier);
     this._router.add('GET', '/openapi.json', () => app.content(openapi));
   }
 

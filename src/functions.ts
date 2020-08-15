@@ -5,8 +5,8 @@ export function content<T>(content: T, statusCode = 200, headers?: {[key: string
   return new app.Result(content, statusCode, headers);
 }
 
-export function createCore(openapi: app.IOpenApi) {
-  return new app.Core(openapi);
+export function createCore(openapi: app.IOpenApi, operationModifier?: app.IOperationModifier) {
+  return new app.Core(openapi, operationModifier);
 }
 
 export function createOperation(operationId: string) {
