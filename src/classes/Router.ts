@@ -22,65 +22,60 @@ export class Router {
     if (this._handlers[lowerCaseMethod]) {
       for (const [matcher, operationHandler] of this._handlers[lowerCaseMethod]) {
         const match = matcher(path);
-        const result = match && await operationHandler(context.withPath(match.params));
-        const response = result && this._operationModifier ? await this._operationModifier(result) : result;
-        if (response) return response;
+        if (match) {
+          const result = await tryAsync(context.withPath(match.params), operationHandler);
+          if (this._operationModifier) {
+            return await tryAsync(result, this._operationModifier);
+          } else {
+            return result;
+          }
+        }
       }
     }
     return app.status(404);
   }
 
   express() {
-    return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      try {
-        const result = await this.execAsync(req.method, req.path, app.Context.express(req));
-        if (Buffer.isBuffer(result.content)) {
-          copyHeaders(result, res);
-          res.status(result.statusCode);
-          res.send(result.content);
-        } else if (typeof result.content === 'function') {
-          copyHeaders(result, res);
-          res.status(result.statusCode);
-          await result.content(req, res);
-        } else {
-          copyHeaders(result, res);
-          res.status(result.statusCode);
-          res.json(result.content);
-        }
-      } catch (error) {
-        next(error);
+    return async (req: express.Request, res: express.Response) => {
+      const result = await this.execAsync(req.method, req.path, app.Context.express(req));
+      if (Buffer.isBuffer(result.content)) {
+        copyHeaders(result, res);
+        res.status(result.statusCode);
+        res.send(result.content);
+      } else if (typeof result.content === 'function') {
+        copyHeaders(result, res);
+        res.status(result.statusCode);
+        await result.content(req, res);
+      } else {
+        copyHeaders(result, res);
+        res.status(result.statusCode);
+        res.json(result.content);
       }
     };
   }
 
   node() {
     return async (req: http.IncomingMessage, res: http.ServerResponse) => {
-      try {
-        const context = await app.Context.nodeAsync(req);
-        const result = await this.execAsync(req.method!, context.path, context);
-        if (Buffer.isBuffer(result.content)) {
-          copyHeaders(result, res);
-          res.statusCode = result.statusCode;
-          res.write(result.content);
-          res.end();
-        } else if (typeof result.content === 'function') {
-          copyHeaders(result, res);
-          res.statusCode = result.statusCode;
-          await result.content(req, res);
-        } else if (result.content == null) {
-          copyHeaders(result, res);
-          res.statusCode = result.statusCode;
-          res.end();
-        } else {
-          copyHeaders(result, res);
-          res.setHeader('Content-Type', 'application/json');
-          res.statusCode = result.statusCode;
-          res.write(JSON.stringify(result.content));
-          res.end();
-        }
-      } catch (error) {
-        res.statusCode = 500;
-        res.write(String(error && error.stack));
+      const context = await app.Context.nodeAsync(req);
+      const result = await this.execAsync(req.method!, context.path, context);
+      if (Buffer.isBuffer(result.content)) {
+        copyHeaders(result, res);
+        res.statusCode = result.statusCode;
+        res.write(result.content);
+        res.end();
+      } else if (typeof result.content === 'function') {
+        copyHeaders(result, res);
+        res.statusCode = result.statusCode;
+        await result.content(req, res);
+      } else if (result.content == null) {
+        copyHeaders(result, res);
+        res.statusCode = result.statusCode;
+        res.end();
+      } else {
+        copyHeaders(result, res);
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = result.statusCode;
+        res.write(JSON.stringify(result.content));
         res.end();
       }
     };
@@ -91,5 +86,13 @@ function copyHeaders<T>(result: app.Result<T>, res: http.ServerResponse) {
   for (const key in result.headers) {
     const value = result.headers[key];
     res.setHeader(key, value);
+  }
+}
+
+async function tryAsync<T>(param: T, fn: (param: T) => PromiseLike<app.Result<any>> | app.Result<any>) {
+  try {
+    return await fn(param);
+  } catch (error) {
+    return app.content(String(error && error.stack), 500);
   }
 }
