@@ -13,31 +13,26 @@ export class Runner {
   }
 
   async handleAsync(context: app.Context) {
-    try {
-      this._process(context);
-      if ((this._operation.parameters || this._operation.requestBody) && !this._ajv.validateRequest(this._operation, context)) {
-        return app.content(`Request validation failed: ${this._ajv.errorText}`, 400);
+    this._process(context);
+    if ((this._operation.parameters || this._operation.requestBody) && !this._ajv.validateRequest(this._operation, context)) {
+      return app.content(`Request validation failed: ${this._ajv.errorText}`, 400);
+    } else {
+      const result = await this._operationHandler(context);
+      const response = this._find(String(result.statusCode));
+      if (!response) {
+        return app.content(`Unspecified status code: ${result.statusCode}`, 500);
+      } else if (!response.content) {
+        if (!result.content) return result;
+        return app.content('Invalid result content (Should be empty)', 500);
+      } else if (!result.content) {
+        return app.content('Invalid result content (Should be populated)', 500);
+      } else if (Buffer.isBuffer(result.content) || typeof result.content === 'function') {
+        return result;
+      } else if (!this._ajv.validateResponse(this._operation, response.key, result.content)) {
+        return app.content(`Response validation failed: ${this._ajv.errorText}`, 500);
       } else {
-        const result = await this._operationHandler(context);
-        const response = this._find(String(result.statusCode));
-        if (!response) {
-          return app.content(`Unspecified status code: ${result.statusCode}`, 500);
-        } else if (!response.content) {
-          if (!result.content) return result;
-          return app.content('Invalid result content (Should be empty)', 500);
-        } else if (!result.content) {
-          return app.content('Invalid result content (Should be populated)', 500);
-        } else if (Buffer.isBuffer(result.content) || typeof result.content === 'function') {
-          return result;
-        } else if (!this._ajv.validateResponse(this._operation, response.key, result.content)) {
-          return app.content(`Response validation failed: ${this._ajv.errorText}`, 500);
-        } else {
-          return result;
-        }
+        return result;
       }
-    } catch (error) {
-      const message = String(error && error.stack);
-      return app.content(message, 500);
     }
   }
 

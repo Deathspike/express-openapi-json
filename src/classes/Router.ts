@@ -93,6 +93,6 @@ async function tryAsync<T>(param: T, fn: (param: T) => PromiseLike<app.Result<an
   try {
     return await fn(param);
   } catch (error) {
-    return app.content(String(error && error.stack), 500);
+    return app.content(String(error && (error.stack || error.message || error)), 500);
   }
 }
