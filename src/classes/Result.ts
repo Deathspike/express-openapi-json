@@ -1,12 +1,12 @@
 export class Result<T> {
   private readonly _content?: T;
-  private readonly _headers?: {[key: string]: string};
-  private readonly _statusCode?: number;
+  private readonly _headers: {[key: string]: string};
+  private readonly _statusCode: number;
 
   constructor(content?: T, statusCode?: number, headers?: {[key: string]: string}) {
     this._content = content;
-    this._headers = headers;
-    this._statusCode = statusCode;
+    this._headers = headers || {};
+    this._statusCode = statusCode || 200;
   }
 
   get content() {
@@ -14,10 +14,10 @@ export class Result<T> {
   }
   
   get headers() {
-    return this._headers || {};
+    return this._headers;
   }
 
   get statusCode() {
-    return this._statusCode || 200;
+    return this._statusCode;
   }
 }
